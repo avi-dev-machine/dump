@@ -36,17 +36,17 @@ graph TB
     end
 
     %% LAYER 1 ↔ LAYER 3 (HTTPS/WebSocket)
-    Layer1 -->|Location + SOS<br/>HTTPS/WebSocket| SubH
-    SubH -->|Results + Alerts<br/>WebSocket Push| Layer1
+    Layer1 -->|Location + SOS / HTTPS/WebSocket| SubH
+    SubH -->|Results + Alerts / WebSocket Push| Layer1
     
     %% LAYER 2 ↔ LAYER 3 (Triple-mode)
-    Layer2 -->|GPS + Vitals + Critical SOS<br/>MQTT/4G/SMS| SubH
-    SubH -->|Acknowledgments + Commands<br/>MQTT/4G| Layer2
-    Layer2 -.->|Fallback P2P Mesh<br/>LoRa Relay| Layer3
+    Layer2 -->|GPS + Vitals + Critical SOS / MQTT/4G/SMS| SubH
+    SubH -->|Acknowledgments + Commands / MQTT/4G| Layer2
+    Layer2 -.->|Fallback P2P Mesh / LoRa Relay| Layer3
     
     %% LAYER 2 ↔ LAYER 1 (Emergency fallback)
-    Layer2 -.->|Emergency SOS<br/>LoRa Direct| Layer1
-    Layer1 -.->|Relay to Backend<br/>When online| SubH
+    Layer2 -.->|Emergency SOS / LoRa Direct| Layer1
+    Layer1 -.->|Relay to Backend / When online| SubH
     
     %% LAYER 3 (Internal)
     SubG <-->|Dashboard UI| SubH
@@ -106,40 +106,40 @@ graph TB
     end
     
     %% ===== TOURIST APP → BACKEND =====
-    T1 -->|POST /api/location/track<br/>Batch: [lat, lon, ts]<br/>JWT Auth| B1
-    T2 -->|POST /api/sos<br/>GPS + health vitals<br/>Emergency flag| B2
+    T1 -->|POST /api/location/track / Batch: lat,lon,ts / JWT Auth| B1
+    T2 -->|POST /api/sos / GPS + health vitals / Emergency flag| B2
     
     %% ===== WEARABLE → BACKEND (Primary) =====
-    W1 -->|MQTT: device/GPS/telemetry<br/>4G/3G when available<br/>Update every 20–30s| B1
-    W2 -->|SOS Trigger<br/>Critical health anomaly<br/>Auto-detection| B2
+    W1 -->|MQTT: device/GPS/telemetry / 4G/3G when available / Every 20-30s| B1
+    W2 -->|SOS Trigger / Critical health anomaly / Auto-detection| B2
     
     %% ===== WEARABLE → BACKEND (Fallback) =====
-    W2 -.->|SMS via Twilio<br/>When 4G unavailable<br/>GPS + Alert ID| B2
-    W2 -.->|LoRa P2P Relay<br/>To nearby wearables<br/>Until internet reached| B3
+    W2 -.->|SMS via Twilio / When 4G unavailable / GPS + Alert ID| B2
+    W2 -.->|LoRa P2P Relay / To nearby wearables / Until internet| B3
     
     %% ===== BACKEND → DASHBOARD (Real-time) =====
-    B1 -->|WebSocket: live_locations<br/>Streaming feed<br/>Every 1–2s| D1
-    B2 -->|WebSocket: critical_alerts<br/>SOS events + severity<br/>Instant notify| D3
-    B3 -->|WebSocket: updates<br/>Cluster changes + anomalies<br/>Push to UI| D2
-    B4 -->|Isolation Forest Scores<br/>Route deviations + inactivity<br/>Flagged tourists| D3
+    B1 -->|WebSocket: live_locations / Streaming / Every 1-2s| D1
+    B2 -->|WebSocket: critical_alerts / SOS events + severity / Instant| D3
+    B3 -->|WebSocket: updates / Cluster changes + anomalies / Push to UI| D2
+    B4 -->|Isolation Forest Scores / Route deviations + inactivity / Flagged| D3
     
     %% ===== DASHBOARD ANALYSIS → BACKEND =====
-    D2 -->|Trigger LLM Analysis<br/>Crowd density + risk data<br/>Get patrol suggestions| B4
-    D3 -->|Officer Actions<br/>Acknowledge anomalies<br/>Mark SOS resolved| B2
+    D2 -->|Trigger LLM Analysis / Crowd density + risk data / Patrol suggestions| B4
+    D3 -->|Officer Actions / Acknowledge anomalies / Mark SOS resolved| B2
     
     %% ===== BACKEND → TOURIST APP (Push) =====
-    B2 -->|WebSocket: sos_confirmed<br/>Officer dispatched<br/>Provides ETA| T3
-    B3 -->|WebSocket: geofence_alert<br/>Entering high-risk zone<br/>Show warning popup| T3
-    B4 -->|WebSocket: anomaly_check<br/>If inactivity detected<br/>Request status| T2
+    B2 -->|WebSocket: sos_confirmed / Officer dispatched / Provides ETA| T3
+    B3 -->|WebSocket: geofence_alert / Entering high-risk zone / Warning| T3
+    B4 -->|WebSocket: anomaly_check / Inactivity detected / Request status| T2
     
     %% ===== BACKEND → WEARABLE =====
-    B2 -->|MQTT ACK<br/>SOS received<br/>Vibration confirm| W3
-    B3 -->|MQTT command<br/>Geofence entry alert<br/>Update OLED| W3
-    B2 -->|SMS Response<br/>Officer details<br/>If SMS path used| W3
+    B2 -->|MQTT ACK / SOS received / Vibration confirm| W3
+    B3 -->|MQTT command / Geofence entry alert / Update OLED| W3
+    B2 -->|SMS Response / Officer details / If SMS path used| W3
     
     %% ===== DASHBOARD → WEARABLE (Indirect) =====
-    D3 -->|Officer sends alert<br/>Via backend| B3
-    B3 -->|MQTT Push<br/>To wearable: officer<br/>approaching| W3
+    D3 -->|Officer sends alert via backend| B3
+    B3 -->|MQTT Push / Officer approaching / Update OLED| W3
     
     %% Styling
     style Tourist fill:#e1f5ff,stroke:#01579b,stroke-width:2px
